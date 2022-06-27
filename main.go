@@ -31,10 +31,10 @@ func main() {
 	// Retrieve an AppConfig token to then make the request
 	// for the latest version of the feature flag
 	token, err := svc.StartConfigurationSession(&appconfigdata.StartConfigurationSessionInput{
+		// The ApplicationIdentifier for the application that depends on the feature flag.
 		ApplicationIdentifier: jsii.String(ApplicationIdentifier),
+
 		// The configuration profile ID or the configuration profile name.
-		//
-		// ConfigurationProfileIdentifier is a required field
 		ConfigurationProfileIdentifier: jsii.String(ConfigurationProfileIdentifier),
 
 		// The AppConfig environment ID (ex: dev, beta, prod, etc.).
