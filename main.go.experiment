@@ -10,6 +10,18 @@ import (
 	"github.com/aws/jsii-runtime-go"
 )
 
+// feature flag format:
+// {"allegiance":{"choice":"darkknight","enabled":true}}
+// Struct for unmarshall simplifies outputting field data as string in the Lambda
+// may simplify to the map version of the implementation later
+type featureflagdata struct {
+	Choice  string
+	Enabled bool
+}
+type featureflag struct {
+	Allegiance featureflagdata
+}
+
 const (
 	ApplicationIdentifier          string = "appconfig-blog-go"
 	ConfigurationProfileIdentifier string = "WhichSide"
@@ -17,6 +29,7 @@ const (
 )
 
 func main() {
+
 	// Specifying the region when creating the AWS Session
 	mySession, err := session.NewSession(&aws.Config{
 		Region: aws.String("us-east-1"),
@@ -49,10 +62,16 @@ func main() {
 	if err != nil {
 		fmt.Println(err)
 	}
-	// resultStruct := result.Configuration
-	var results map[string]interface{}
-	json.Unmarshal(result.Configuration, &results)
-	birds := results["allegiance"].(map[string]interface{})
-	// json.Unmarshal(result.Configuration, &resultStruct)
-	fmt.Println(birds["choice"])
+
+	// Option if not defining a struct in advance for unmarshall
+
+	// var featureFlagResults map[string]interface{}
+	// json.Unmarshal(result.Configuration, &featureFlagResults)
+	// CecilsChoice := featureFlagResults["allegiance"].(map[string]interface{})
+	// fmt.Println(CecilsChoice["choice"])
+
+	var featureFlagResults featureflag
+	json.Unmarshal(result.Configuration, &featureFlagResults)
+	CecilsChoice := featureFlagResults.Allegiance.Choice
+	fmt.Println(CecilsChoice)
 }
