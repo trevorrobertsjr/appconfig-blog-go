@@ -1,6 +1,8 @@
 package main
 
 import (
+	"encoding/json"
+
 	"github.com/pulumi/pulumi-aws/sdk/v5/go/aws/appconfig"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 )
@@ -30,15 +32,9 @@ func main() {
 		if err != nil {
 			return err
 		}
-		envres, err = appconfig.NewEnvironment(ctx, "exampleEnvironment", &appconfig.EnvironmentArgs{
+		envres, err := appconfig.NewEnvironment(ctx, "blogEnvironment", &appconfig.EnvironmentArgs{
 			Description:   pulumi.String("Example AppConfig Environment"),
 			ApplicationId: appres.ID(),
-			Monitors: appconfig.EnvironmentMonitorArray{
-				&appconfig.EnvironmentMonitorArgs{
-					AlarmArn:     pulumi.Any(aws_cloudwatch_metric_alarm.Example.Arn),
-					AlarmRoleArn: pulumi.Any(aws_iam_role.Example.Arn),
-				},
-			},
 			Tags: pulumi.StringMap{
 				"Type": pulumi.String("AppConfig Environment"),
 			},
@@ -46,19 +42,83 @@ func main() {
 		if err != nil {
 			return err
 		}
-		deployres, err := appconfig.NewDeployment(ctx, "example", &appconfig.DeploymentArgs{
-			ApplicationId:          appres.ID(),
-			ConfigurationProfileId: pulumi.Any(aws_appconfig_configuration_profile.Example.Configuration_profile_id),
-			ConfigurationVersion:   pulumi.Any(aws_appconfig_hosted_configuration_version.Example.Version_number),
-			DeploymentStrategyId:   depstratres.ID(),
-			Description:            pulumi.String("My example deployment"),
-			EnvironmentId:          pulumi.Any(aws_appconfig_environment.Example.Environment_id),
+		cfgprofileres, err := appconfig.NewConfigurationProfile(ctx, "blogConfigurationProfile", &appconfig.ConfigurationProfileArgs{
+			ApplicationId: appres.ID(),
+			Description:   pulumi.String("Example Configuration Profile"),
+			LocationUri:   pulumi.String("hosted"),
 			Tags: pulumi.StringMap{
-				"Type": pulumi.String("AppConfig Deployment"),
+				"Type": pulumi.String("AppConfig Configuration Profile"),
 			},
 		})
 		if err != nil {
 			return err
+		}
+		tmpJSON0, err := json.Marshal(map[string]interface{}{
+			"flags": map[string]interface{}{
+				"foo": map[string]interface{}{
+					"name": "foo",
+					"_deprecation": map[string]interface{}{
+						"status": "planned",
+					},
+				},
+				"bar": map[string]interface{}{
+					"name": "bar",
+					"attributes": map[string]interface{}{
+						"someAttribute": map[string]interface{}{
+							"constraints": map[string]interface{}{
+								"type":     "string",
+								"required": true,
+							},
+						},
+						"someOtherAttribute": map[string]interface{}{
+							"constraints": map[string]interface{}{
+								"type":     "number",
+								"required": true,
+							},
+						},
+					},
+				},
+			},
+			"values": map[string]interface{}{
+				"foo": map[string]interface{}{
+					"enabled": "true",
+				},
+				"bar": map[string]interface{}{
+					"enabled":            "true",
+					"someAttribute":      "Hello World",
+					"someOtherAttribute": 123,
+				},
+			},
+			"version": "1",
+		})
+		if err != nil {
+			return err
+		}
+		json0 := string(tmpJSON0)
+		hostedCfgVersion, err := appconfig.NewHostedConfigurationVersion(ctx, "blogConfigurationVersion", &appconfig.HostedConfigurationVersionArgs{
+			ApplicationId:          appres.ID(),
+			ConfigurationProfileId: cfgprofileres.ConfigurationProfileId,
+			Description:            pulumi.String("Example Freeform Hosted Configuration Version"),
+			ContentType:            pulumi.String("application/json"),
+			Content:                pulumi.String(json0),
+		})
+		if err != nil {
+			return err
+		}
+		_, errDeploy := appconfig.NewDeployment(ctx, "blogDeployment", &appconfig.DeploymentArgs{
+			ApplicationId:          appres.ID(),
+			ConfigurationProfileId: cfgprofileres.ConfigurationProfileId,
+			ConfigurationVersion:   pulumi.Sprintf("%v", hostedCfgVersion.VersionNumber),
+			DeploymentStrategyId:   depstratres.ID(),
+			Description:            pulumi.String("My example deployment"),
+			EnvironmentId:          envres.EnvironmentId,
+			Tags: pulumi.StringMap{
+				"Type": pulumi.String("AppConfig Deployment"),
+			},
+		})
+
+		if errDeploy != nil {
+			return errDeploy
 		}
 		return nil
 	})
