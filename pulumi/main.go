@@ -9,8 +9,11 @@ import (
 
 func main() {
 	pulumi.Run(func(ctx *pulumi.Context) error {
-		appres, err := appconfig.NewApplication(ctx, "blogapplication", &appconfig.ApplicationArgs{
-			Description: pulumi.String("Example AppConfig Application"),
+
+		// Create an AWS AppConfig resource for our application's feature flags
+		applicationResource, err := appconfig.NewApplication(ctx, "blogApplication", &appconfig.ApplicationArgs{
+			Description: pulumi.String("Blog AppConfig Application"),
+			Name:        pulumi.String("blogAppConfigGo"),
 			Tags: pulumi.StringMap{
 				"Type": pulumi.String("AppConfig Application"),
 			},
@@ -18,10 +21,12 @@ func main() {
 		if err != nil {
 			return err
 		}
-		depstratres, err := appconfig.NewDeploymentStrategy(ctx, "blogdeploymentstrategy", &appconfig.DeploymentStrategyArgs{
-			DeploymentDurationInMinutes: pulumi.Int(3),
-			Description:                 pulumi.String("Example Deployment Strategy"),
-			FinalBakeTimeInMinutes:      pulumi.Int(4),
+
+		// Specify the update frequency for changes to the application's feature flags
+		deploymentStrategyResource, err := appconfig.NewDeploymentStrategy(ctx, "blogDeploymentStrategy", &appconfig.DeploymentStrategyArgs{
+			DeploymentDurationInMinutes: pulumi.Int(1),
+			Description:                 pulumi.String("Blog Deployment Strategy"),
+			FinalBakeTimeInMinutes:      pulumi.Int(1),
 			GrowthFactor:                pulumi.Float64(10),
 			GrowthType:                  pulumi.String("LINEAR"),
 			ReplicateTo:                 pulumi.String("NONE"),
@@ -32,9 +37,12 @@ func main() {
 		if err != nil {
 			return err
 		}
-		envres, err := appconfig.NewEnvironment(ctx, "blogEnvironment", &appconfig.EnvironmentArgs{
-			Description:   pulumi.String("Example AppConfig Environment"),
-			ApplicationId: appres.ID(),
+
+		// Define which application environment (ex: dev, prod, alpha, beta)
+		environmentResource, err := appconfig.NewEnvironment(ctx, "blogEnvironment", &appconfig.EnvironmentArgs{
+			Description:   pulumi.String("Blog AppConfig Environment"),
+			ApplicationId: applicationResource.ID(),
+			Name:          pulumi.String("prod"),
 			Tags: pulumi.StringMap{
 				"Type": pulumi.String("AppConfig Environment"),
 			},
@@ -42,10 +50,16 @@ func main() {
 		if err != nil {
 			return err
 		}
-		cfgprofileres, err := appconfig.NewConfigurationProfile(ctx, "blogConfigurationProfile", &appconfig.ConfigurationProfileArgs{
-			ApplicationId: appres.ID(),
-			Description:   pulumi.String("Example Configuration Profile"),
+
+		// Specify the type of resource our application will consume for the service
+		// We are using feature flags in this application, but free form JSON input
+		// is also supported.
+		configurationProfileResource, err := appconfig.NewConfigurationProfile(ctx, "blogConfigurationProfile", &appconfig.ConfigurationProfileArgs{
+			ApplicationId: applicationResource.ID(),
+			Name:          pulumi.String("whichSide"),
+			Description:   pulumi.String("Blog Configuration Profile"),
 			LocationUri:   pulumi.String("hosted"),
+			Type:          pulumi.String("AWS.AppConfig.FeatureFlags"),
 			Tags: pulumi.StringMap{
 				"Type": pulumi.String("AppConfig Configuration Profile"),
 			},
@@ -53,26 +67,16 @@ func main() {
 		if err != nil {
 			return err
 		}
-		tmpJSON0, err := json.Marshal(map[string]interface{}{
+
+		// Define the structure of the feature flag(s) our application will use
+		rawFeatureFlagJSONInput, err := json.Marshal(map[string]interface{}{
 			"flags": map[string]interface{}{
-				"foo": map[string]interface{}{
-					"name": "foo",
-					"_deprecation": map[string]interface{}{
-						"status": "planned",
-					},
-				},
-				"bar": map[string]interface{}{
-					"name": "bar",
+				"allegiance": map[string]interface{}{
+					"name": "allegiance",
 					"attributes": map[string]interface{}{
-						"someAttribute": map[string]interface{}{
+						"choice": map[string]interface{}{
 							"constraints": map[string]interface{}{
 								"type":     "string",
-								"required": true,
-							},
-						},
-						"someOtherAttribute": map[string]interface{}{
-							"constraints": map[string]interface{}{
-								"type":     "number",
 								"required": true,
 							},
 						},
@@ -80,13 +84,9 @@ func main() {
 				},
 			},
 			"values": map[string]interface{}{
-				"foo": map[string]interface{}{
+				"allegiance": map[string]interface{}{
 					"enabled": "true",
-				},
-				"bar": map[string]interface{}{
-					"enabled":            "true",
-					"someAttribute":      "Hello World",
-					"someOtherAttribute": 123,
+					"choice":  "paladin",
 				},
 			},
 			"version": "1",
@@ -94,24 +94,30 @@ func main() {
 		if err != nil {
 			return err
 		}
-		json0 := string(tmpJSON0)
-		hostedCfgVersion, err := appconfig.NewHostedConfigurationVersion(ctx, "blogConfigurationVersion", &appconfig.HostedConfigurationVersionArgs{
-			ApplicationId:          appres.ID(),
-			ConfigurationProfileId: cfgprofileres.ConfigurationProfileId,
-			Description:            pulumi.String("Example Freeform Hosted Configuration Version"),
+		// Convert the feature flag input to a string for input to the
+		// Hosted Configuration Version Resource
+		featureFlagJSONInput := string(rawFeatureFlagJSONInput)
+
+		// Create a configuration version for each change to the feature flag(s)
+		hostedConfigurationVersionResource, err := appconfig.NewHostedConfigurationVersion(ctx, "blogHostedConfigurationVersion", &appconfig.HostedConfigurationVersionArgs{
+			ApplicationId:          applicationResource.ID(),
+			ConfigurationProfileId: configurationProfileResource.ConfigurationProfileId,
+			Description:            pulumi.String("Blog Feature Flag Hosted Configuration Version"),
 			ContentType:            pulumi.String("application/json"),
-			Content:                pulumi.String(json0),
+			Content:                pulumi.String(featureFlagJSONInput),
 		})
 		if err != nil {
 			return err
 		}
+
+		// Deploy the feature flag.
 		_, errDeploy := appconfig.NewDeployment(ctx, "blogDeployment", &appconfig.DeploymentArgs{
-			ApplicationId:          appres.ID(),
-			ConfigurationProfileId: cfgprofileres.ConfigurationProfileId,
-			ConfigurationVersion:   pulumi.Sprintf("%v", hostedCfgVersion.VersionNumber),
-			DeploymentStrategyId:   depstratres.ID(),
-			Description:            pulumi.String("My example deployment"),
-			EnvironmentId:          envres.EnvironmentId,
+			ApplicationId:          applicationResource.ID(),
+			ConfigurationProfileId: configurationProfileResource.ConfigurationProfileId,
+			ConfigurationVersion:   pulumi.Sprintf("%v", hostedConfigurationVersionResource.VersionNumber),
+			DeploymentStrategyId:   deploymentStrategyResource.ID(),
+			Description:            pulumi.String("My Blog Deployment"),
+			EnvironmentId:          environmentResource.EnvironmentId,
 			Tags: pulumi.StringMap{
 				"Type": pulumi.String("AppConfig Deployment"),
 			},
