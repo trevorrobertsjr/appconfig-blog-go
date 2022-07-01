@@ -14,27 +14,6 @@ import (
 	"github.com/aws/jsii-runtime-go"
 )
 
-// func handler(request events.S3Entity) (string, error) {
-// 	log.Println("Hello World")
-
-// 	// Read feature flags and modify what is returned accordingly
-// 	resp, err := http.Get("http://localhost:2772/applications/appconfig-blog-go/environments/dev/configurations/WhichSide")
-// 	if err != nil {
-// 		log.Fatalln(err)
-// 	}
-// 	//We Read the response body on the line below.
-// 	body, err := ioutil.ReadAll(resp.Body)
-// 	if err != nil {
-// 		log.Fatalln(err)
-// 	}
-// 	//Convert the body to type string
-// 	sb := string(body)
-// 	// log.Printf(sb)
-// 	// Read DynamoDB
-// 	// Return html
-// 	return fmt.Sprintf(sb), nil
-// }
-// feature flag format:
 // {"allegiance":{"choice":"darkknight","enabled":true}}
 // Struct for unmarshall simplifies outputting field data as string in the Lambda
 // may simplify to the map version of the implementation later
@@ -47,9 +26,9 @@ type featureflag struct {
 }
 
 const (
-	ApplicationIdentifier          string = "appconfig-blog-go"
-	ConfigurationProfileIdentifier string = "WhichSide"
-	EnvironmentIdentifier          string = "dev"
+	ApplicationIdentifier          string = "blogAppConfigGo"
+	ConfigurationProfileIdentifier string = "whichSide"
+	EnvironmentIdentifier          string = "prod"
 )
 
 func handler(ctx context.Context, request events.APIGatewayProxyRequest) (string, error) {
@@ -57,6 +36,7 @@ func handler(ctx context.Context, request events.APIGatewayProxyRequest) (string
 	mySession, err := session.NewSession(&aws.Config{
 		Region: aws.String("us-east-1"),
 	})
+
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -78,16 +58,22 @@ func handler(ctx context.Context, request events.APIGatewayProxyRequest) (string
 	})
 	if err != nil {
 		fmt.Println(err)
+		// fmt.Println(("Unable to start configuration session"))
+		panic("Unable to start configuration session")
+
 	}
+
 	result, err := svc.GetLatestConfiguration(&appconfigdata.GetLatestConfigurationInput{
 		ConfigurationToken: jsii.String(*token.InitialConfigurationToken),
 	})
 	if err != nil {
 		fmt.Println(err)
+		// fmt.Println(("Unable to get latest configuration"))
+		panic("Unable to get latest configuration")
+
 	}
 
-	// Option if not defining a struct in advance for unmarshall
-
+	// Alternative feature flag handling if not defining a struct in advance for unmarshall
 	// var featureFlagResults map[string]interface{}
 	// json.Unmarshal(result.Configuration, &featureFlagResults)
 	// CecilsChoice := featureFlagResults["allegiance"].(map[string]interface{})
@@ -99,6 +85,7 @@ func handler(ctx context.Context, request events.APIGatewayProxyRequest) (string
 	fmt.Println(CecilsChoice)
 	log.Println(CecilsChoice)
 	return fmt.Sprintf(CecilsChoice), nil
+	// return fmt.Sprintf("test"), nil
 }
 
 func main() {

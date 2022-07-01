@@ -1,0 +1,25 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": "logs:CreateLogGroup",
+            "Resource": "arn:aws:logs:us-east-1:318168271290:*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "logs:CreateLogStream",
+                "logs:PutLogEvents"
+            ],
+            "Resource": [
+                "arn:aws:logs:us-east-1:318168271290:log-group:/aws/lambda/blogAppConfigGoLambda:*"
+            ]
+        },
+        {
+            "Effect": "Allow",
+            "Action": "appconfig:GetLatestConfiguration",
+            "Resource": "arn:aws:appconfig:us-east-1:318168271290:application/blogAppConfigGo/environment/prod/configuration/whichSide"
+        }
+    ]
+}
