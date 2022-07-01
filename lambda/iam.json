@@ -17,9 +17,16 @@
             ]
         },
         {
+            "Sid": "VisualEditor0",
             "Effect": "Allow",
             "Action": "appconfig:GetLatestConfiguration",
-            "Resource": "arn:aws:appconfig:us-east-1:318168271290:application/blogAppConfigGo/environment/prod/configuration/whichSide"
+            "Resource": "arn:aws:appconfig:us-east-1:318168271290:application/1cuub6o/environment/xn8o2iu/configuration/7r077ve"
+        },
+        {
+            "Sid": "VisualEditor1",
+            "Effect": "Allow",
+            "Action": "appconfig:StartConfigurationSession",
+            "Resource": "arn:aws:appconfig:us-east-1:318168271290:application/1cuub6o/environment/xn8o2iu/configuration/7r077ve"
         }
     ]
 }
