@@ -13,7 +13,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/appconfigdata"
 	"github.com/aws/jsii-runtime-go"
 )
-//function.zip && GOOS=linux GOARCH=amd64 go build -o main lambda.go && zip function.zip main
+
 // {"allegiance":{"choice":"darkknight","enabled":true}}
 // Struct for unmarshall simplifies outputting field data as string in the Lambda
 // may simplify to the map version of the implementation later
@@ -82,17 +82,17 @@ func handler(ctx context.Context, request events.APIGatewayProxyRequest) (string
 	<img src="assets/img/dark_knight_cecil.png" alt="image of Cecil as a Dark Knight">
 </section>
 <section>
-	<p>Cecil chose the path of the Dark Knight. The new and unfamiliar path of the alternative was too
-	 discomforting for him to stray from the path set out for him by his adopted family. Cecil's mother
-	 was disappointed, but she ultimately understood.</p>
+	<p>Cecil continued to walk the path of the Dark Knight. The Paladin's path was too new and unfamiliar to Cecil for him to accept.
+	Cecil determined he was strong enough to defeat the King of Baron with the Dark Sword. The spirit of Cecil's father
+	 was disappointed, but he ultimately understood.</p>
 </section>`
 	htmlPaladinOutput := `			<section>
 	<img src="assets/img/paladin_cecil.png" alt="image of Cecil as a Paladin">
 </section>
 <section>
-	<p>Cecil heeded the words of his mother and took his rightful place as the prophesied Paladin.
-	 Contrary to his fears, selecting the light has grown his power exponentially. He then realized his former general
-	 had him take the dark sword to hold him back rather than to empower him.</p>
+	<p>Cecil heeded the words of the light and took his rightful place as the prophesied Paladin.
+	 Contrary to his fears, selecting the light grew his power exponentially. He then realized the King of Baron encouraged
+	 Cecil to take the dark sword to prevent him from realizing his full potential.</p>
 </section>`
 	var featureFlagResults featureflag
 	json.Unmarshal(result.Configuration, &featureFlagResults)

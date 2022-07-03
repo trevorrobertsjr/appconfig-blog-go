@@ -67,6 +67,9 @@ func main() {
 		if err != nil {
 			return err
 		}
+		acceptableValues := make([]string, 2)
+		acceptableValues[0] = "darkknight"
+		acceptableValues[1] = "paladin"
 
 		// Define the structure of the feature flag(s) our application will use
 		rawFeatureFlagJSONInput, err := json.Marshal(map[string]interface{}{
@@ -77,6 +80,7 @@ func main() {
 						"choice": map[string]interface{}{
 							"constraints": map[string]interface{}{
 								"type":     "string",
+								"enum":     acceptableValues,
 								"required": true,
 							},
 						},
