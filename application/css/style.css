@@ -54,7 +54,7 @@ header {
 section {
      border: 1px hidden black;
      height: auto;
-     width: 50%;
+     /* width: 50%; */
      text-align: center;
 
 }
@@ -74,7 +74,7 @@ section {
      }
 
      img {
-          width: 25%
+          width: 50%
      }
 
 
