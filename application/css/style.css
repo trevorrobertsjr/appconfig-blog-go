@@ -24,24 +24,29 @@ img {
 
 h1,
 h2 {
-     color: aliceblue;
+     font-family: 'VT323', monospace;
+}
+
+p {
+     font-family: 'Roboto', sans-serif;
 }
 
 /******************************************
 /* BASE STYLES
 /*******************************************/
 
-body {}
+body {
+     background-color: aliceblue;
+}
 
 
 /******************************************
 /* LAYOUT
 /*******************************************/
-header,
-footer {
+header {
      height: 100px;
      border: 1px hidden black;
-     background-color: black;
+     background-color: white;
      text-align: center;
 
 }
@@ -50,22 +55,20 @@ section {
      border: 1px hidden black;
      height: auto;
      width: 50%;
-
      text-align: center;
 
 }
 
 @media screen and (max-width: 600px) {
      section {
-          background-color: aliceblue;
           width: auto;
+          height: 100%;
      }
 
 }
 
-@media (min-width: 601px) and (max-width: 900px) {
+@media (min-width: 601px) and (max-width: 1600px) {
      section {
-          background-color: aliceblue;
           width: 50%;
           float: left;
      }
