@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 
 	"github.com/pulumi/pulumi-aws/sdk/v5/go/aws/appconfig"
+	"github.com/pulumi/pulumi-aws/sdk/v5/go/aws/ecs"
+	"github.com/pulumi/pulumi-aws/sdk/v5/go/aws/iam"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 )
 
@@ -130,6 +132,107 @@ func main() {
 		if errDeploy != nil {
 			return errDeploy
 		}
+
+		// Assume Role Policy for ecs tasks
+
+		tmpJSON0, err := json.Marshal(map[string]interface{}{
+			"Version": "2012-10-17",
+			"Statement": []map[string]interface{}{
+				map[string]interface{}{
+					"Action": "sts:AssumeRole",
+					"Effect": "Allow",
+					"Sid":    "",
+					"Principal": map[string]interface{}{
+						"Service": "ecs-tasks.amazonaws.com",
+					},
+				},
+			},
+		})
+		if err != nil {
+			return err
+		}
+
+		// Deploy an IAM role with appconfig permisison
+		json0 := string(tmpJSON0)
+		ecsTaskRole, err := iam.NewRole(ctx, "appConfigRole", &iam.RoleArgs{
+			AssumeRolePolicy: pulumi.String(json0),
+			ManagedPolicyArns: pulumi.StringArray{pulumi.String("arn:aws:iam::318168271290:policy/AppConfigAllAccess")},
+			Tags: pulumi.StringMap{
+				"tag-key": pulumi.String("tag-value"),
+			},
+		})
+		if err != nil {
+			return err
+		}
+		
+
+		// Deploy an ECS Cluster
+		ecsCluster, err := ecs.NewCluster(ctx, "appConfigAgentFargate", &ecs.ClusterArgs{
+
+		})
+		if err != nil {
+			return err
+		}
+		// Deploy an ECS Task Definition
+
+		// Task Definition Properties
+		ecsTaskDefTmpJSON0, err := json.Marshal([]interface{}{
+			map[string]interface{}{
+				"name":      "appConfigAgent",
+				"image":     "public.ecr.aws/aws-appconfig/aws-appconfig-agent:2.x",
+				"essential": true,
+				"portMappings": []map[string]interface{}{
+					map[string]interface{}{
+						"containerPort": 2772,
+						"hostPort":      2772,
+					},
+				},
+			},
+		})
+		if err != nil {
+			return err
+		}
+		// Create Task Definition from properties described above
+		ecsTaskDefJSON0 := string(ecsTaskDefTmpJSON0)
+		ecsTaskDefinition, err := ecs.NewTaskDefinition(ctx, "AppConfigAgent", &ecs.TaskDefinitionArgs{
+			Family:               pulumi.String("AppConfigAgent"),
+			ContainerDefinitions: pulumi.String(ecsTaskDefJSON0),
+			TaskRoleArn: ecsTaskRole.Arn,
+			Cpu:                  pulumi.String("256"),
+			Memory:               pulumi.String("512"),
+			NetworkMode:          pulumi.String("awsvpc"),
+			RequiresCompatibilities: pulumi.StringArray{
+				pulumi.String("FARGATE"),
+			},
+		})
+		if err != nil {
+			return err
+		}
+
+		// Deploy a Fargate service to ECS
+		_, err = ecs.NewService(ctx, "AppConfigListener", &ecs.ServiceArgs{
+			Cluster:        ecsCluster.Arn,
+			TaskDefinition: ecsTaskDefinition.Arn,
+			DesiredCount:   pulumi.Int(1),
+			LaunchType: pulumi.String("FARGATE"),
+			NetworkConfiguration: &ecs.ServiceNetworkConfigurationArgs{
+					Subnets: pulumi.StringArray{pulumi.String("subnet-09dd613a058ca077c"),},
+					AssignPublicIp: pulumi.Bool(true),
+					SecurityGroups: pulumi.StringArray{pulumi.String("sg-0198dc928c67a40b3"),},
+				},
+
+		})
+
+		if err != nil {
+			return err
+		}
+
+		// Sample curl
+		// $ curl "http://44.212.32.110:2772/applications/blogAppConfigGo/environments/prod/configurations/whichSide?flag=allegiance"
+
 		return nil
+
+
+
 	})
 }
