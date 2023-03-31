@@ -1,0 +1,16 @@
+---
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: appconfig-eks
+  region: us-east-1
+  version: "1.25"
+
+availabilityZones: ["us-east-1a", "us-east-1b", "us-east-1c"]
+
+managedNodeGroups:
+  - name: k8snode
+    desiredCapacity: 3
+    instanceType: t3a.small
+    # spot: true
