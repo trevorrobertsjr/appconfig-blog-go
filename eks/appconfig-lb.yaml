@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: appconfig-blog-service
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+spec:
+  selector:
+    app: appconfig-blog
+  ports:
+    - port: 80
+      targetPort: 80
+  type: LoadBalancer
