@@ -9,5 +9,5 @@ spec:
     app: appconfig-blog
   ports:
     - port: 80
-      targetPort: 80
+      targetPort: 8088
   type: LoadBalancer

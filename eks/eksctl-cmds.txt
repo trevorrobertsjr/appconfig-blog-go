@@ -68,3 +68,5 @@ aws ec2 authorize-security-group-ingress \
   --ip-permissions IpProtocol=tcp,FromPort=30000,ToPort=32767,IpRanges=[{CidrIp=0.0.0.0/0}]
 
   eks-cluster-sg-appconfig-eks-317330531
+
+kubectl exec --stdin --tty appconfig-blog-7776688f77-zxpg9 -- /bin/bash
