@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="description" content="Display the choice Cecil has made" />
+    <meta name="keywords" content="light, Dark, Paladin, Knight" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Final Fantasy Allegiance</title>
+
+    <!-- external CSS link -->
+    <link rel="stylesheet" href="css/normalize.css" />
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Merriweather:ital@1&family=Niconne&family=Roboto&family=VT323&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <header>
+      <h1>Cecil's Destiny</h1>
+      <h2>Final Fantasy IV</h2>
+    </header>
+    <div id="displayCecil">
+      <% if (data.choice == "paladin") { %>
+      <section>
+        <img src="img/paladin_cecil.png" alt="image of Cecil as a Paladin" />
+      </section>
+      <section>
+        <p>
+          Cecil heeded the words of the light and took his rightful place as the
+          prophesied Paladin. Contrary to his fears, selecting the light grew
+          his power exponentially. He then realized the King of Baron encouraged
+          Cecil to take the dark sword to prevent him from realizing his full
+          potential.
+        </p>
+      </section>
+      <% } else { %>
+      <section>
+        <img
+          src="img/dark_knight_cecil.png"
+          alt="image of Cecil as a Dark Knight"
+        />
+      </section>
+      <section>
+        <p>
+          Cecil continued to walk the path of the Dark Knight. The Path of the
+          Paladin was too new and unfamiliar to Cecil for him to accept. Cecil
+          determined he was strong enough to defeat the King of Baron with the
+          Dark Sword. The spirit of the father of Cecil was disappointed, but he
+          ultimately understood.
+        </p>
+      </section>
+      <% } %>
+    </div>
+
+    <script type="text/javascript" src="js/main.js"></script>
+    <footer class="clear"></footer>
+  </body>
+</html>

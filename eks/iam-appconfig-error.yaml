@@ -1,0 +1,80 @@
+❯ kubectl describe pod appconfig-blog-5c45b549-x2wvz
+Name:             appconfig-blog-5c45b549-x2wvz
+Namespace:        default
+Priority:         0
+Service Account:  default
+Node:             ip-192-168-15-235.us-east-2.compute.internal/192.168.15.235
+Start Time:       Sun, 02 Apr 2023 20:41:52 -0400
+Labels:           app=appconfig-blog
+                  pod-template-hash=5c45b549
+Annotations:      <none>
+Status:           Running
+IP:               192.168.31.168
+IPs:
+  IP:           192.168.31.168
+Controlled By:  ReplicaSet/appconfig-blog-5c45b549
+Containers:
+  my-app:
+    Container ID:   containerd://57ba8368071a8cfdbf6963193da96b324b76e4dcecca269bccabefd7e84ea134
+    Image:          318168271290.dkr.ecr.us-east-2.amazonaws.com/appconfig-blog-app:latest
+    Image ID:       318168271290.dkr.ecr.us-east-2.amazonaws.com/appconfig-blog-app@sha256:620cc3fad4472074f8144804a89fea9626f7ee93bf8931b30c3914af263e96cb
+    Port:           <none>
+    Host Port:      <none>
+    State:          Running
+      Started:      Sun, 02 Apr 2023 20:41:57 -0400
+    Ready:          True
+    Restart Count:  0
+    Environment:    <none>
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-496md (ro)
+  appconfig-agent:
+    Container ID:   containerd://34e8e8068ebf0e7174229e99b827081fcb5bcf4ed248804eaf2b0c60b500ad9e
+    Image:          public.ecr.aws/aws-appconfig/aws-appconfig-agent:2.x
+    Image ID:       public.ecr.aws/aws-appconfig/aws-appconfig-agent@sha256:b14c2f2c218d1969b00ce059a4905858f4854c3c80544b98a0e066b7a3474d4b
+    Port:           2772/TCP
+    Host Port:      0/TCP
+    State:          Waiting
+      Reason:       CrashLoopBackOff
+    Last State:     Terminated
+      Reason:       Error
+      Exit Code:    1
+      Started:      Sun, 02 Apr 2023 20:42:17 -0400
+      Finished:     Sun, 02 Apr 2023 20:42:17 -0400
+    Ready:          False
+    Restart Count:  2
+    Environment:
+      us-east-2:  region
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-496md (ro)
+Conditions:
+  Type              Status
+  Initialized       True
+  Ready             False
+  ContainersReady   False
+  PodScheduled      True
+Volumes:
+  kube-api-access-496md:
+    Type:                    Projected (a volume that contains injected data from multiple sources)
+    TokenExpirationSeconds:  3607
+    ConfigMapName:           kube-root-ca.crt
+    ConfigMapOptional:       <nil>
+    DownwardAPI:             true
+QoS Class:                   BestEffort
+Node-Selectors:              <none>
+Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:
+  Type     Reason     Age                From               Message
+  ----     ------     ----               ----               -------
+  Normal   Scheduled  48s                default-scheduler  Successfully assigned default/appconfig-blog-5c45b549-x2wvz to ip-192-168-15-235.us-east-2.compute.internal
+  Normal   Pulling    47s                kubelet            Pulling image "318168271290.dkr.ecr.us-east-2.amazonaws.com/appconfig-blog-app:latest"
+  Normal   Pulled     43s                kubelet            Successfully pulled image "318168271290.dkr.ecr.us-east-2.amazonaws.com/appconfig-blog-app:latest" in 4.179593571s (4.179610522s including waiting)
+  Normal   Created    43s                kubelet            Created container my-app
+  Normal   Started    43s                kubelet            Started container my-app
+  Normal   Pulled     38s                kubelet            Successfully pulled image "public.ecr.aws/aws-appconfig/aws-appconfig-agent:2.x" in 4.392075444s (4.392086434s including waiting)
+  Normal   Pulled     37s                kubelet            Successfully pulled image "public.ecr.aws/aws-appconfig/aws-appconfig-agent:2.x" in 171.076006ms (171.105706ms including waiting)
+  Normal   Pulling    24s (x3 over 43s)  kubelet            Pulling image "public.ecr.aws/aws-appconfig/aws-appconfig-agent:2.x"
+  Normal   Created    24s (x3 over 38s)  kubelet            Created container appconfig-agent
+  Normal   Pulled     24s                kubelet            Successfully pulled image "public.ecr.aws/aws-appconfig/aws-appconfig-agent:2.x" in 167.127756ms (167.137766ms including waiting)
+  Normal   Started    23s (x3 over 38s)  kubelet            Started container appconfig-agent
+  Warning  BackOff    10s (x4 over 36s)  kubelet            Back-off restarting failed container

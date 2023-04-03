@@ -1,32 +1,70 @@
+# configure OIDC provider
+eksctl utils associate-iam-oidc-provider --cluster=appconfig-eks --approve
 
-eksctl utils associate-iam-oidc-provider --cluster= --approve
-eksctl create iamserviceaccount --cluster= --name=appconfig --namespace=default --attach-policy-arn=arn:aws:iam::318168271290:policy/AppConfigAllAccess
-kubectl get serviceaccount
-kubectl get serviceaccounts
+# configure serviceAccount with AppConfig access policy
+eksctl create iamserviceaccount --cluster=appconfig-eks --name=appconfig --namespace=default --attach-policy-arn=arn:aws:iam::318168271290:policy/AppConfigAllAccess --approve
+
+# Download AWS Load Balancer Controller IAM Policy JSON and Deploy it
 curl -O https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/v2.4.7/docs/install/iam_policy.json\n
 aws iam create-policy   --policy-name AWSLoadBalancerControllerIAMPolicy   --policy-document file://iam_policy.json
-eksctl create iamserviceaccount  --cluster=  --namespace=kube-system  --name=aws-load-balancer-controller   --role-name AmazonEKSLoadBalancerControllerRole   --attach-policy-arn=arn:aws:iam::318168271290:policy/AWSLoadBalancerControllerIAMPolicy   --approve
-helm repo add eks https://aws.github.io/eks-charts
-helm repo update
-kubectl get deployment -n kube-system aws-load-balancer-controller\n
-kubectl describe deployment -n kube-system aws-load-balancer-controller
-kubectl get deployment -n kube-system aws-load-balancer-controller\n
-kubectl describe deployment -n kube-system aws-load-balancer-controller
-kubectl get pods -n kube-system
-kubectl describe pod aws-load-balancer-controller-5f8786df4b-bd57t -n kube-system
 
+# Create AWS Load Balancer Controller serviceAccount with IAM Policy
 eksctl create iamserviceaccount \
-  --cluster=eksworkshop-eksctl \
+  --cluster=<your cluster> \
   --namespace=kube-system \
   --name=aws-load-balancer-controller \
   --role-name AmazonEKSLoadBalancerControllerRole \
   --attach-policy-arn=arn:aws:iam::318168271290:policy/AWSLoadBalancerControllerIAMPolicy \
   --approve
 
+# Add the eks repo for Helm
+helm repo add eks https://aws.github.io/eks-charts
+helm repo update
 
-
-  helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
+# Deploy the AWS Load Balancer Controller
+helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
   -n kube-system \
-  --set clusterName=eksworkshop-eksctl \
+  --set clusterName=<your cluster> \
   --set serviceAccount.create=false \
   --set serviceAccount.name=aws-load-balancer-controller 
+
+# Check load balancer deployment status
+kubectl get deployment -n kube-system aws-load-balancer-controller
+
+
+eksctl-appconfig-eks-cluster/VPC
+
+aws ec2 create-security-group \
+    --group-name my-security-group \
+    --description "My Security Group" \
+    --vpc-id vpc-1234567890
+
+
+aws ec2 describe-vpcs \
+    --filters "Name=tag:Name,Values=eksctl-appconfig-eks-cluster/VPC" \
+    --query "Vpcs[0].VpcId" \
+    --output text | jq -r .
+
+
+aws ec2 create-security-group \
+    --group-name my-security-group \
+    --description "My Security Group" \
+    --vpc-id vpc-1234567890 \
+    --query 'GroupId' \
+    --output text | xargs -I {} aws ec2 authorize-security-group-ingress \
+    --group-id {} \
+    --ip-permissions IpProtocol=tcp,FromPort=30000,ToPort=32767,IpRanges=[{CidrIp=0.0.0.0/0}]
+
+
+
+
+SECURITY_GROUP_ID=$(aws ec2 describe-security-groups \
+--filters "VpcId=vpc-0abd35123e2b1fe90" \
+--output text --query 'SecurityGroups[0].GroupId')
+
+aws ec2 authorize-security-group-ingress \
+  --group-id ${SECURITY_GROUP_ID} \
+  --protocol tcp \
+  --ip-permissions IpProtocol=tcp,FromPort=30000,ToPort=32767,IpRanges=[{CidrIp=0.0.0.0/0}]
+
+  eks-cluster-sg-appconfig-eks-317330531
