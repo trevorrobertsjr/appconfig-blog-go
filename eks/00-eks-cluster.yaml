@@ -4,13 +4,13 @@ kind: ClusterConfig
 
 metadata:
   name: appconfig-eks
-  region: us-east-1
+  region: us-east-2
   version: "1.25"
 
-availabilityZones: ["us-east-1a", "us-east-1b", "us-east-1c"]
+availabilityZones: ["us-east-2a", "us-east-2b", "us-east-2c"]
 
 managedNodeGroups:
   - name: k8snode
     desiredCapacity: 3
     instanceType: t3a.small
-    # spot: true
+    spot: true

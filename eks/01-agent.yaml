@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: my-app
-          image: 318168271290.dkr.ecr.us-east-1.amazonaws.com/blog-appconfig-eks:latest
+          image: 318168271290.dkr.ecr.us-east-2.amazonaws.com/appconfig-blog-app:latest
           imagePullPolicy: IfNotPresent
         - name: appconfig-agent
           image: public.ecr.aws/aws-appconfig/aws-appconfig-agent:2.x
@@ -25,6 +25,6 @@ spec:
               containerPort: 2772
               protocol: TCP
           env:
-            - name: us-east-1
+            - name: us-east-2
               value: region
           imagePullPoliy: IfNotPresent
