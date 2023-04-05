@@ -17,7 +17,7 @@ spec:
       serviceAccountName: appconfig
       containers:
         - name: my-app
-          image: 318168271290.dkr.ecr.us-east-2.amazonaws.com/appconfig-blog-app:latest
+          image: <YourAccountNumber>.dkr.ecr.us-east-2.amazonaws.com/appconfig-blog-app:latest
           imagePullPolicy: Always
         - name: appconfig-agent
           image: public.ecr.aws/aws-appconfig/aws-appconfig-agent:2.x

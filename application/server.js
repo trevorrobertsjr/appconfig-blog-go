@@ -16,12 +16,8 @@ app.use(express.static(__dirname + "/public"));
 app.get("/", function (req, res) {
   // Make API request to get data
   request(
-    //AppConfig
+    //AppConfig Agent API Call
     "http://localhost:2772/applications/blogAppConfigGo/environments/prod/configurations/whichSide?flag=allegiance",
-    //Paladin
-    // "https://mocki.io/v1/58155774-c261-4e1e-a2a9-576bf9e9977c",
-    //Dark Knight
-    // "https://mocki.io/v1/4c6a46fc-011e-4a3b-b621-174fd9778058",
     function (error, response, body) {
       if (!error && response.statusCode == 200) {
         // Parse JSON data
